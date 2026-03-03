@@ -38,6 +38,11 @@ const MCP_AUTH_TOKEN = process.env.MCP_AUTH_TOKEN;
 const PORT = parseInt(process.env.PORT ?? '8080', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
 
+// Debug: log env var presence at startup (no values)
+console.error('[CRM-MCP] Env check — SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'MISSING');
+console.error('[CRM-MCP] Env check — SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? `SET (${SUPABASE_SERVICE_ROLE_KEY.length} chars)` : 'MISSING');
+console.error('[CRM-MCP] Env check — MCP_AUTH_TOKEN:', MCP_AUTH_TOKEN ? 'SET' : 'MISSING');
+
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !MCP_AUTH_TOKEN) {
   console.error('Missing required environment variables:');
   if (!SUPABASE_URL) console.error('  - SUPABASE_URL');
