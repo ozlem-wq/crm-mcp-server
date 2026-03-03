@@ -1,0 +1,23 @@
+{
+  "name": "crm-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server exposing CRM tools for ElevenAgents integration",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch & node --watch dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@supabase/supabase-js": "^2.90.1",
+    "express": "^5.2.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.7",
+    "typescript": "^5.9.3"
+  }
+}
