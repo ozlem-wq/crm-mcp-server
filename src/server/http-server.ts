@@ -25,6 +25,8 @@ export interface HttpMcpServerOptions {
   rateLimitMaxRequests?: number;  // Default: 100
   rateLimitWindowMs?: number;     // Default: 60000 (1 min)
   requestTimeoutMs?: number;      // Default: 30000 (30s)
+  // REST tool executor — ElevenLabs webhook tools için
+  toolExecutor?: (name: string, args: unknown) => Promise<unknown>;
 }
 
 export type McpServerFactory = () => Server;
@@ -150,14 +152,15 @@ export class HttpMcpServer {
       res.json({ status: 'ok', tools: 7, transport: 'streamable-http' });
     });
 
-    // Bearer token auth middleware — sadece /mcp için
+    // Bearer token auth middleware — /mcp ve /tools için
+    // "Bearer TOKEN" veya salt "TOKEN" formatını kabul eder (ElevenLabs her ikisini de gönderebilir)
     const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
       const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
-        res.status(401).json({ error: 'Unauthorized', message: 'Bearer token required' });
+      if (!authHeader) {
+        res.status(401).json({ error: 'Unauthorized', message: 'Authorization header required' });
         return;
       }
-      const token = authHeader.slice(7);
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
       if (token !== this.options.authToken) {
         res.status(403).json({ error: 'Forbidden', message: 'Invalid token' });
         return;
@@ -166,6 +169,31 @@ export class HttpMcpServer {
     };
 
     this.app.use('/mcp', authMiddleware);
+
+    // ─── REST Tool Endpoints — ElevenLabs webhook tools ──────────────────────
+    // POST /tools/:name  →  tool'u çalıştır, JSON dön
+    if (this.options.toolExecutor) {
+      this.app.use('/tools', authMiddleware);
+
+      this.app.post('/tools/:name', (req: Request, res: Response) => {
+        void (async () => {
+          const name = Array.isArray(req.params.name) ? req.params.name[0] : req.params.name;
+          try {
+            const result = await this.options.toolExecutor!(name, req.body ?? {});
+            res.json(result);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (message.includes('Unknown tool')) {
+              res.status(404).json({ error: 'Tool not found', tool: name });
+            } else {
+              console.error(`[CRM-REST] Tool ${name} error:`, error);
+              res.status(400).json({ error: message });
+            }
+          }
+        })();
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // POST /mcp — MCP JSON-RPC handler (stateless)
     this.app.post('/mcp', (req: Request, res: Response) => {

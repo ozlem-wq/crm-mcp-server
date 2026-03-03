@@ -153,7 +153,18 @@ async function main() {
   console.error(`[CRM-MCP] Supabase URL: ${SUPABASE_URL}`);
 
   const httpServer = new HttpMcpServer(
-    { port: PORT, host: HOST, authToken: MCP_AUTH_TOKEN! },
+    {
+      port: PORT,
+      host: HOST,
+      authToken: MCP_AUTH_TOKEN!,
+      // ElevenLabs webhook tools için REST executor
+      toolExecutor: async (name: string, args: unknown) => {
+        const tool = tools.get(name);
+        if (!tool) throw new Error(`Unknown tool: ${name}`);
+        const parsedArgs = tool.inputSchema.parse(args);
+        return tool.execute(parsedArgs, supabase);
+      },
+    },
     createMcpServer,
   );
 
