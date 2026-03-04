@@ -26,9 +26,8 @@ export const getTicketDetailsTool = {
     const { data, error } = await supabase
       .from('tickets')
       .select(`
-        id, ticket_number, subject, priority, status,
-        created_at, sla_deadline,
-        assignee:profiles(full_name),
+        id, ticket_number, title, description, priority_id, status,
+        created_at, sla_deadline, assigned_to,
         contact:contacts(first_name, last_name)
       `)
       .eq('id', input.ticket_id)

@@ -28,8 +28,8 @@ export const updateTicketTool = {
     const { error } = await supabase
       .from('tickets')
       .update({
-        escalated: true,
-        ...(input.assignee_id ? { assignee_id: input.assignee_id } : {}),
+        status: 'escalated',
+        ...(input.assignee_id ? { assigned_to: input.assignee_id } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', input.ticket_id);

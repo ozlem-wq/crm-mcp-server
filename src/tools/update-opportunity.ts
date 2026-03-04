@@ -28,10 +28,10 @@ export const updateOpportunityTool = {
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
     const { error } = await supabase
-      .from('opportunities')
+      .from('deals')
       .update({
-        status: input.status,
-        ...(input.notes ? { notes: input.notes } : {}),
+        vapi_status: input.status,
+        ...(input.notes ? { description: input.notes } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', input.opportunity_id);

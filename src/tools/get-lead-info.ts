@@ -25,7 +25,7 @@ export const getLeadInfoTool = {
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
     const { data, error } = await supabase
       .from('contacts')
-      .select('id, first_name, last_name, email, phone, company_name, source, notes')
+      .select('id, first_name, last_name, full_name, email, phone, mobile, job_title, source, notes, company:companies(name)')
       .eq('id', input.contact_id)
       .single();
 

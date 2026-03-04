@@ -26,7 +26,7 @@ export const getQuoteDetailsTool = {
     const { data, error } = await supabase
       .from('quotes')
       .select(`
-        id, quote_number, total_amount, currency,
+        id, quote_number, grand_total, currency,
         valid_until, status, notes,
         contact:contacts(first_name, last_name, phone)
       `)
