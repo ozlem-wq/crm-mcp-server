@@ -7,19 +7,19 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const inputSchema = z.object({
-  quote_id: z.string().uuid('quote_id must be a valid UUID'),
+  quote_number: z.string().min(1, 'quote_number is required'),
 });
 
 export const getQuoteDetailsTool = {
   name: 'get_quote_details',
-  description: 'Retrieve quote/proposal details from the CRM by quote ID. Returns quote number, amount, currency, validity, status, notes, and associated contact info.',
+  description: 'Retrieve quote/proposal details from the CRM by quote number (e.g. TEK-00001). Returns amount, currency, validity, status, notes, and associated contact info.',
   inputSchema,
   mcpInputSchema: {
     type: 'object',
     properties: {
-      quote_id: { type: 'string', format: 'uuid', description: 'The UUID of the quote to look up' },
+      quote_number: { type: 'string', description: 'The quote number to look up (e.g. TEK-00001)' },
     },
-    required: ['quote_id'],
+    required: ['quote_number'],
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
@@ -30,7 +30,7 @@ export const getQuoteDetailsTool = {
         valid_until, status, notes,
         contact:contacts(first_name, last_name, phone)
       `)
-      .eq('id', input.quote_id)
+      .eq('quote_number', input.quote_number)
       .single();
 
     if (error) throw new Error(`Supabase error: ${error.message}`);

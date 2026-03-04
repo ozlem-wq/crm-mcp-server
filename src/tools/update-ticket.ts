@@ -7,21 +7,19 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const inputSchema = z.object({
-  ticket_id: z.string().uuid('ticket_id must be a valid UUID'),
-  assignee_id: z.string().uuid('assignee_id must be a valid UUID').optional(),
+  ticket_number: z.string().min(1, 'ticket_number is required'),
 });
 
 export const updateTicketTool = {
   name: 'update_ticket_escalation',
-  description: 'Escalate a support ticket. Marks it as escalated and optionally reassigns to a new agent.',
+  description: 'Escalate a support ticket by ticket number. Sets status to escalated.',
   inputSchema,
   mcpInputSchema: {
     type: 'object',
     properties: {
-      ticket_id: { type: 'string', format: 'uuid', description: 'The UUID of the ticket to escalate' },
-      assignee_id: { type: 'string', format: 'uuid', description: 'Optional UUID of the new assignee' },
+      ticket_number: { type: 'string', description: 'The ticket number to escalate (e.g. TKT-00001)' },
     },
-    required: ['ticket_id'],
+    required: ['ticket_number'],
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
@@ -29,10 +27,9 @@ export const updateTicketTool = {
       .from('tickets')
       .update({
         status: 'escalated',
-        ...(input.assignee_id ? { assigned_to: input.assignee_id } : {}),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', input.ticket_id);
+      .eq('ticket_number', input.ticket_number);
 
     if (error) throw new Error(`Supabase error: ${error.message}`);
     return { success: true };

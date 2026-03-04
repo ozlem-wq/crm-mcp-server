@@ -7,23 +7,23 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const inputSchema = z.object({
-  quote_id: z.string().uuid('quote_id must be a valid UUID'),
+  quote_number: z.string().min(1, 'quote_number is required'),
   status: z.string().max(50, 'status max 50 chars'),
   reason: z.string().max(2000, 'reason max 2000 chars').optional(),
 });
 
 export const updateQuoteTool = {
   name: 'update_quote_status',
-  description: 'Update the status of a quote/proposal. Optionally add a reason.',
+  description: 'Update the status of a quote/proposal by quote number. Optionally add a reason.',
   inputSchema,
   mcpInputSchema: {
     type: 'object',
     properties: {
-      quote_id: { type: 'string', format: 'uuid', description: 'The UUID of the quote' },
+      quote_number: { type: 'string', description: 'The quote number (e.g. TEK-00001)' },
       status: { type: 'string', maxLength: 50, description: 'New status (e.g. sent, accepted, rejected, expired)' },
       reason: { type: 'string', maxLength: 2000, description: 'Optional reason for the status change' },
     },
-    required: ['quote_id', 'status'],
+    required: ['quote_number', 'status'],
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
@@ -34,7 +34,7 @@ export const updateQuoteTool = {
         ...(input.reason ? { notes: input.reason } : {}),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', input.quote_id);
+      .eq('quote_number', input.quote_number);
 
     if (error) throw new Error(`Supabase error: ${error.message}`);
     return { success: true };
