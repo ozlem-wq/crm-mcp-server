@@ -26,7 +26,7 @@ export const updateTicketTool = {
     const { error } = await supabase
       .from('tickets')
       .update({
-        status: 'escalated',
+        status: 'in_progress',
         updated_at: new Date().toISOString(),
       })
       .eq('ticket_number', input.ticket_number);
