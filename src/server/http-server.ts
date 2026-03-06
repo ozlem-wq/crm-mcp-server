@@ -149,7 +149,7 @@ export class HttpMcpServer {
   private setupRoutes(): void {
     // Health check — auth gerektirmez
     this.app.get('/health', (_req: Request, res: Response) => {
-      res.json({ status: 'ok', tools: 7, transport: 'streamable-http' });
+      res.json({ status: 'ok', tools: 8, transport: 'streamable-http' });
     });
 
     // Bearer token auth middleware — /mcp ve /tools için

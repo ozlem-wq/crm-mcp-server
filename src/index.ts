@@ -2,7 +2,8 @@
  * CRM MCP Server — Entry Point
  *
  * ElevenAgents'a CRM tool'larını MCP protocol üzerinden sunar.
- * 7 tool: get_lead_info, get_quote_details, get_ticket_details,
+ * 8 tool: get_contact_by_phone (kimlik doğrulama),
+ *         get_lead_info, get_quote_details, get_ticket_details,
  *         update_opportunity_status, update_quote_status,
  *         update_ticket_escalation, reschedule_call
  *
@@ -22,6 +23,7 @@ import { z } from 'zod';
 import { HttpMcpServer } from './server/http-server.js';
 
 // Tool imports
+import { getContactByPhoneTool } from './tools/get-contact-by-phone.js';
 import { getLeadInfoTool } from './tools/get-lead-info.js';
 import { getQuoteDetailsTool } from './tools/get-quote-details.js';
 import { getTicketDetailsTool } from './tools/get-ticket-details.js';
@@ -67,6 +69,7 @@ interface CrmTool {
 }
 
 const allTools: CrmTool[] = [
+  getContactByPhoneTool,
   getLeadInfoTool,
   getQuoteDetailsTool,
   getTicketDetailsTool,
