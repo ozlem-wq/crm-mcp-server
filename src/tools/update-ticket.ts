@@ -12,7 +12,7 @@ export const inputSchema = z.object({
 
 export const updateTicketTool = {
   name: 'update_ticket_escalation',
-  description: 'Escalate a support ticket by ticket number. Sets status to escalated.',
+  description: 'Escalate a support ticket by ticket number. Sets status to in_progress (escalation path).',
   inputSchema,
   mcpInputSchema: {
     type: 'object',
@@ -23,15 +23,17 @@ export const updateTicketTool = {
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('tickets')
       .update({
         status: 'in_progress',
         updated_at: new Date().toISOString(),
       })
-      .eq('ticket_number', input.ticket_number);
+      .eq('ticket_number', input.ticket_number)
+      .select('id');
 
     if (error) throw new Error(`Supabase error: ${error.message}`);
+    if (!data || data.length === 0) return { success: false, reason: 'Record not found' };
     return { success: true };
   },
 };

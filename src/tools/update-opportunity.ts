@@ -27,16 +27,18 @@ export const updateOpportunityTool = {
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('deals')
       .update({
         vapi_status: input.status,
         ...(input.notes ? { description: input.notes } : {}),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', input.opportunity_id);
+      .eq('id', input.opportunity_id)
+      .select('id');
 
     if (error) throw new Error(`Supabase error: ${error.message}`);
+    if (!data || data.length === 0) return { success: false, reason: 'Record not found' };
     return { success: true };
   },
 };

@@ -27,16 +27,18 @@ export const updateQuoteTool = {
   },
 
   async execute(input: z.infer<typeof inputSchema>, supabase: SupabaseClient) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('quotes')
       .update({
         status: input.status,
         ...(input.reason ? { notes: input.reason } : {}),
         updated_at: new Date().toISOString(),
       })
-      .eq('quote_number', input.quote_number);
+      .eq('quote_number', input.quote_number)
+      .select('id');
 
     if (error) throw new Error(`Supabase error: ${error.message}`);
+    if (!data || data.length === 0) return { success: false, reason: 'Record not found' };
     return { success: true };
   },
 };
